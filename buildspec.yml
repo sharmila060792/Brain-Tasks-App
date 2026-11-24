@@ -10,10 +10,11 @@ phases:
   install:
     commands:
       - echo "Installing kubectl..."
-      - curl -LO "https://k8s.io(curl -L -s https://k8s.io)/bin/linux/amd64/kubectl"
+      - curl -o kubectl https://k8s.io
       - chmod +x ./kubectl
       - mv ./kubectl /usr/local/bin/kubectl
       - kubectl version --client
+
 
   pre_build:
     commands:
