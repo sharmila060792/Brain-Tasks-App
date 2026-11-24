@@ -9,8 +9,8 @@ env:
 phases:
   install:
     commands:
-      - echo "Installing kubectl..."
-      - curl -o kubectl https://k8s.io
+      - echo "Installing kubectl from Amazon EKS S3..."
+      - curl -fLo kubectl https://amazonaws.com
       - chmod +x ./kubectl
       - mv ./kubectl /usr/local/bin/kubectl
       - kubectl version --client
