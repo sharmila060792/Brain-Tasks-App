@@ -9,11 +9,16 @@ env:
 phases:
   install:
     commands:
-      - echo "Installing kubectl from Amazon EKS S3..."
-      - curl -fLo kubectl https://amazonaws.com
-      - chmod +x ./kubectl
-      - mv ./kubectl /usr/local/bin/kubectl
+      - echo "Installing kubectl via apt..."
+      - apt-get update -y
+      - apt-get install -y apt-transport-https ca-certificates curl gpg
+      - mkdir -p -m 755 /etc/apt/keyrings
+      - curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      - echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
+      - apt-get update -y
+      - apt-get install -y kubectl
       - kubectl version --client
+
 
 
   pre_build:
