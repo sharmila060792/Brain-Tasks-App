@@ -39,8 +39,9 @@ phases:
       - docker push $REPO_URI:$IMAGE_TAG
       - echo "Updating kubeconfig and deploying to EKS..."
       - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
-      - sed -i "s|<AWS_ACCOUNT_ID>://<ECR_REPO_NAME>:latest|$REPO_URI:$IMAGE_TAG|g" deployement.yaml
-      - kubectl apply -f deployement.yaml
-      - kubectl apply -f service.yaml
+      - ls -la
+      - kubectl apply -f deployment.yaml || kubectl apply -f deployement.yaml || kubectl apply -f k8s/
+      - kubectl apply -f service.yaml || kubectl apply -f k8s/service.yaml
+      - kubectl set image deployment/brain-app-deployment brain-app=$REPO_URI:$IMAGE_TAG
       - kubectl rollout status deployment/brain-app-deployment
       - kubectl get svc
