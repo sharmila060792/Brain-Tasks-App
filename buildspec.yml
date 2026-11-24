@@ -41,7 +41,7 @@ phases:
       - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
       - ls -la
       - kubectl apply -f deployment.yaml || kubectl apply -f deployement.yaml || kubectl apply -f k8s/
-      - kubectl apply -f service.yaml || kubectl apply -f k8s/service.yaml
+      - kubectl apply -f k8s/
       - kubectl set image deployment/brain-app-deployment brain-app=$REPO_URI:$IMAGE_TAG
-      - kubectl rollout status deployment/brain-app-deployment
+      - kubectl rollout status deployment/brain-app-deployment --timeout=180s
       - kubectl get svc
