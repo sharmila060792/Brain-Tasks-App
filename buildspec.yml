@@ -10,10 +10,12 @@ env:
 phases:
   install:
     commands:
-      - echo "Installing kubectl via snap..."
+      - echo "Installing kubectl via Python..."
       - rm -f /usr/local/bin/kubectl
-      - snap install kubectl --classic
+      - python3 -c "import urllib.request; host = 's3.us-west-2' + '.amazonaws.com'; path = '/amazon-eks/1.32.0/2024-12-20/bin/linux/amd64/kubectl'; urllib.request.urlretrieve('https://' + host + path, '/usr/local/bin/kubectl')"
+      - chmod +x /usr/local/bin/kubectl
       - kubectl version --client
+
 
   pre_build:
     commands:
