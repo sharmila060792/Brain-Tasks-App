@@ -21,15 +21,40 @@ phases:
 
 
 
+  # pre_build:
+  #   commands:
+  #     - echo "Logging in to Amazon ECR..."
+  #     - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+  #     - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_://amazonaws.com
+  #     - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+  #     - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  #     - IMAGE_TAG=${IMAGE_TAG:=latest}
+
+
+  # build:
+  #   commands:
+  #     - echo "Building Docker image..."
+  #     - docker build -t $REPOSITORY_URI:latest .
+  #     - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+
+  # post_build:
+  #   commands:
+  #     - echo "Pushing Docker image to ECR..."
+  #     - docker push $REPOSITORY_URI:latest
+  #     - docker push $REPOSITORY_URI:$IMAGE_TAG
+  #     - echo "Updating kubeconfig and deploying to EKS..."
+  #     - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
+  #     - sed -i "s|<AWS_ACCOUNT_ID>://<ECR_REPO_NAME>:latest|$REPOSITORY_URI:$IMAGE_TAG|g" k8s/deployment.yaml
+  #     - kubectl apply -f k8s/deployment.yaml
+  #     - kubectl apply -f k8s/service.yaml
+  #     - kubectl rollout status deployment/brain-app-deployment
+  #     - kubectl get svc brain-app-service
   pre_build:
     commands:
       - echo "Logging in to Amazon ECR..."
-      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_://amazonaws.com
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ://amazonaws.com
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${IMAGE_TAG:=latest}
-
 
   build:
     commands:
@@ -44,8 +69,8 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo "Updating kubeconfig and deploying to EKS..."
       - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
-      - sed -i "s|<AWS_ACCOUNT_ID>://<ECR_REPO_NAME>:latest|$REPOSITORY_URI:$IMAGE_TAG|g" k8s/deployment.yaml
-      - kubectl apply -f k8s/deployment.yaml
-      - kubectl apply -f k8s/service.yaml
+      - sed -i "s|<AWS_ACCOUNT_ID>://<ECR_REPO_NAME>:latest|$REPOSITORY_URI:$IMAGE_TAG|g" deployement.yaml
+      - kubectl apply -f deployement.yaml
+      - kubectl apply -f service.yaml
       - kubectl rollout status deployment/brain-app-deployment
-      - kubectl get svc brain-app-service
+      - kubectl get svc
