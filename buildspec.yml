@@ -5,6 +5,7 @@ env:
     AWS_DEFAULT_REGION: "ap-south-2"
     EKS_CLUSTER_NAME: "Brain-Project-EKS"
     ECR_REPO_NAME: "brain-tasks-app"
+    REPOSITORY_URI: "://amazonaws.com"
 
 phases:
   install:
