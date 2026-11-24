@@ -1,25 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
-
 metadata:
   name: brain-app-deployment
-
+  labels:
+    app: brain-app
 spec:
-  replicas: 2
-
+  replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: brain-app
-
   template:
     metadata:
       labels:
         app: brain-app
-
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "false"
+        instrumentation.opentelemetry.io/inject-nodejs: "false"
+        instrumentation.opentelemetry.io/inject-python: "false"
+        instrumentation.opentelemetry.io/inject-dotnet: "false"
     spec:
       containers:
         - name: brain-app
-          image: 772721871298.dkr.ecr.ap-south-1.amazonaws.com/devops-build:v1
+          image: ://amazonaws.com
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
