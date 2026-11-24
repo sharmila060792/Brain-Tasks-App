@@ -4,44 +4,40 @@ env:
   variables:
     AWS_DEFAULT_REGION: "ap-south-2"
     EKS_CLUSTER_NAME: "Brain-Project-EKS"
-    ECR_REGISTRY: "772721871298.dkr.ecr.ap-south-2.amazonaws.com"
-    REPOSITORY_URI: "://amazonaws.com"
+    ACCOUNT_ID: "772721871298"
+    REPO_NAME: "brain-tasks-app"
 
 phases:
   install:
     commands:
-      - echo "Cleaning up any old kubectl and installing via apt..."
+      - echo "Installing kubectl via snap..."
       - rm -f /usr/local/bin/kubectl
-      - apt-get update -y
-      - apt-get install -y apt-transport-https ca-certificates curl gpg
-      - mkdir -p -m 755 /etc/apt/keyrings
-      - curl -fsSL https://k8s.io | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-      - echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://k8s.io /' | tee /etc/apt/sources.list.d/kubernetes.list
-      - apt-get update -y
-      - apt-get install -y kubectl
+      - snap install kubectl --classic
       - kubectl version --client
 
   pre_build:
     commands:
       - echo "Logging in to Amazon ECR..."
-      - aws ecr get-login-password --region ap-south-2 | docker login --username AWS --password-stdin 772721871298.dkr.ecr.ap-south-2.amazonaws.com
+      - REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+      - REPO_URI="${REGISTRY}/${REPO_NAME}"
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REGISTRY
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${IMAGE_TAG:=latest}
 
   build:
     commands:
       - echo "Building Docker image..."
-      - docker build -t ://amazonaws.com:latest .
-      - docker tag ://amazonaws.com:latest ://amazonaws.com:$IMAGE_TAG
+      - docker build -t $REPO_URI:latest .
+      - docker tag $REPO_URI:latest $REPO_URI:$IMAGE_TAG
 
   post_build:
     commands:
       - echo "Pushing Docker image to ECR..."
-      - docker push ://amazonaws.com:latest
-      - docker push ://amazonaws.com:$IMAGE_TAG
+      - docker push $REPO_URI:latest
+      - docker push $REPO_URI:$IMAGE_TAG
       - echo "Updating kubeconfig and deploying to EKS..."
-      - aws eks update-kubeconfig --region ap-south-2 --name Brain-Project-EKS
-      - sed -i "s|<AWS_ACCOUNT_ID>://<ECR_REPO_NAME>:latest|://amazonaws.com:$IMAGE_TAG|g" deployement.yaml
+      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
+      - sed -i "s|<AWS_ACCOUNT_ID>://<ECR_REPO_NAME>:latest|$REPO_URI:$IMAGE_TAG|g" deployement.yaml
       - kubectl apply -f deployement.yaml
       - kubectl apply -f service.yaml
       - kubectl rollout status deployment/brain-app-deployment
